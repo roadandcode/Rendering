@@ -15,9 +15,20 @@ public class TCPClient : MonoBehaviour
     private bool dataReceived = false;
     private string receivedData = "";
 
+
+    [SerializeField] SkinnedMeshRenderer[] Avtars;
+
+    string[] blendshape_names = new string[] {
+        "browDownLeft", "browDownRight", "browInnerUp", "browOuterUpLeft", "browOuterUpRight", "cheekPuff", "cheekSquintLeft", "cheekSquintRight", "eyeBlinkLeft", "eyeBlinkRight", "eyeLookDownLeft", "eyeLookDownRight", "eyeLookInLeft", "eyeLookInRight", "eyeLookOutLeft", "eyeLookOutRight", "eyeLookUpLeft", "eyeLookUpRight", "eyeSquintLeft", "eyeSquintRight", "eyeWideLeft", "eyeWideRight", "jawForward", "jawLeft", "jawOpen", "jawRight", "mouthClose", "mouthDimpleLeft", "mouthDimpleRight", "mouthFrownLeft", "mouthFrownRight", "mouthFunnel", "mouthLeft", "mouthLowerDownLeft", "mouthLowerDownRight", "mouthPressLeft", "mouthPressRight", "mouthPucker", "mouthRight", "mouthRollLower", "mouthRollUpper", "mouthShrugLower", "mouthShrugUpper", "mouthSmileLeft", "mouthSmileRight", "mouthStretchLeft", "mouthStretchRight", "mouthUpperUpLeft", "mouthUpperUpRight", "noseSneerLeft", "noseSneerRight", "tongueOut"
+    };
+    Dictionary<string, float> blendShapeDictionary = new Dictionary<string, float>();
+
+
+
     private void Start()
     {
         ConnectToServer("127.0.0.1", 8080);
+
     }
 
     private void ConnectToServer(string serverIP, int serverPort)
@@ -92,15 +103,12 @@ public class TCPClient : MonoBehaviour
         }
     }
 
-    [SerializeField] SkinnedMeshRenderer Avatar;
-
-    string[] blendshape_names = new string[] {
-        "browDownLeft", "browDownRight", "browInnerUp", "browOuterUpLeft", "browOuterUpRight", "cheekPuff", "cheekSquintLeft", "cheekSquintRight", "eyeBlinkLeft", "eyeBlinkRight", "eyeLookDownLeft", "eyeLookDownRight", "eyeLookInLeft", "eyeLookInRight", "eyeLookOutLeft", "eyeLookOutRight", "eyeLookUpLeft", "eyeLookUpRight", "eyeSquintLeft", "eyeSquintRight", "eyeWideLeft", "eyeWideRight", "jawForward", "jawLeft", "jawOpen", "jawRight", "mouthClose", "mouthDimpleLeft", "mouthDimpleRight", "mouthFrownLeft", "mouthFrownRight", "mouthFunnel", "mouthLeft", "mouthLowerDownLeft", "mouthLowerDownRight", "mouthPressLeft", "mouthPressRight", "mouthPucker", "mouthRight", "mouthRollLower", "mouthRollUpper", "mouthShrugLower", "mouthShrugUpper", "mouthSmileLeft", "mouthSmileRight", "mouthStretchLeft", "mouthStretchRight", "mouthUpperUpLeft", "mouthUpperUpRight", "noseSneerLeft", "noseSneerRight", "tongueOut"
-    };
-    Dictionary<string, float> blendShapeDictionary = new Dictionary<string, float>();
 
     void mapdataOnModel(float[] outputData)
     {
+        if (Avtars.Length == 0)
+            return;
+
 
         //float[] blendShapeValues = new float[52];
 
@@ -111,10 +119,14 @@ public class TCPClient : MonoBehaviour
 
 
 
+
         foreach (var kvp in blendShapeDictionary)
         {
             string blendShapeName = kvp.Key;
             float blendShapeWeight = kvp.Value;
+
+
+            #region Old
 
             //if(blendShapeName == "jawOpen")
             //         {
@@ -122,16 +134,28 @@ public class TCPClient : MonoBehaviour
 
             //}
 
-            // Use the blendShapeName to get the index of the blend shape and set its weight
-            int blendShapeIndex = Avatar.sharedMesh.GetBlendShapeIndex(blendShapeName);
+            // // Use the blendShapeName to get the index of the blend shape and set its weight
+            // int blendShapeIndex = Avatar.sharedMesh.GetBlendShapeIndex(blendShapeName);
 
-            if (blendShapeIndex != -1)
+            // if (blendShapeIndex != -1)
+            // {
+            //     Avatar.SetBlendShapeWeight(blendShapeIndex, blendShapeWeight * 100f);
+            // }
+            // else
+            // {
+            //     //				Debug.LogError("Blend shape not found: " + blendShapeName);
+            // }
+
+            #endregion
+
+
+            foreach (var avtar in Avtars)
             {
-                Avatar.SetBlendShapeWeight(blendShapeIndex, blendShapeWeight * 100f);
-            }
-            else
-            {
-                //				Debug.LogError("Blend shape not found: " + blendShapeName);
+                int blendShapeIndex = avtar.sharedMesh.GetBlendShapeIndex(blendShapeName);
+                if (blendShapeIndex != -1)
+                {
+                    avtar.SetBlendShapeWeight(blendShapeIndex, blendShapeWeight * 100);
+                }
             }
         }
     }
